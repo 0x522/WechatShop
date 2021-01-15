@@ -1,6 +1,7 @@
 package com.wxshop.shop.service;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.wxshop.shop.WechatShopApplication;
@@ -37,67 +38,114 @@ public class AuthIntegrationTest {
     @Autowired
     Environment environment;
 
+    private static class HttpResponse {
+        int code;
+        String body;
+        Map<String, List<String>> headers;
+
+        HttpResponse(int code, String body, Map<String, List<String>> headers) throws JsonProcessingException {
+            this.code = code;
+            this.body = body;
+            this.headers = headers;
+        }
+    }
+
+    private HttpResponse doHttpRequest(String apiName, boolean isGet, Object requestBody, String cookie) throws JsonProcessingException {
+        HttpRequest request = isGet ?
+                HttpRequest.get(getUrl(apiName)) : HttpRequest.post(getUrl(apiName));
+        request.contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE);
+        if (cookie != null) {
+            request.header("Cookie", cookie);
+        }
+        if (requestBody != null) {
+            request.send(objectMapper.writeValueAsString(requestBody));
+        }
+        return new HttpResponse(request.code(), request.body(), request.headers());
+    }
+
     @Test
     public void loginLogoutTest() throws IOException {
 
-        //最开始默认情况下访问 /api/status 处于未登录状态
-        String statusResponse = HttpRequest
-                .get(getUrl("/api/status"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .body();
+        assertNotLoginAtBeginning();
+
+        assertSendSmsCodeSuccess();
+
+        List<String> setCookie = assertLoginWithSmsCodeToObtainCookie();
+
+        String sessionId = assertIsLoginWithCookie(setCookie);
+
+        logoutWithCookie(sessionId);
+
+        assertNotLoginWithCookie(sessionId);
+
+    }
+
+    private void assertNotLoginWithCookie(String sessionId) throws JsonProcessingException {
+        //再次带着cookie访问 /api/status 处于未登录状态
+        String statusResponse = doHttpRequest(
+                "/api/status",
+                true,
+                null,
+                sessionId).body;
         LoginResponse response = objectMapper.readValue(statusResponse, LoginResponse.class);
         Assertions.assertFalse(response.isLogin());
+    }
 
-        //发送验证码
-        int responseCode = HttpRequest
-                .post(getUrl("/api/code"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .send(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_PARAMETER))
-                .code();
-        Assertions.assertEquals(HttpStatus.OK.value(), responseCode);
+    private void logoutWithCookie(String sessionId) throws JsonProcessingException {
+        //访问 /api/logout
+        //注销登录，注意注销登录也要带cookie，否则服务器不知道是哪个用户
+        doHttpRequest("/api/logout", false, null, sessionId);
+    }
 
-        //带着验证码进行登录，得到cookie
-        Map<String, List<String>> responseHeaders = HttpRequest
-                .post(getUrl("/api/login"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .send(objectMapper.writeValueAsString(VALID_PARAMETER_CODE))
-                .headers();
-        List<String> setCookie = responseHeaders.get("Set-Cookie");
-        Assertions.assertNotNull(setCookie);
-
+    private String assertIsLoginWithCookie(List<String> setCookie) throws JsonProcessingException {
         //带着cookie进行访问 /api/status 处于登录状态
         String jsessionidLine = setCookie.stream().filter(cookie -> cookie.contains("JSESSIONID")).findFirst().get();
         String sessionId = getSessionIdFromSetCookie(jsessionidLine);
-        statusResponse = HttpRequest
-                .get(getUrl("/api/status"))
-                .header("Cookie", sessionId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .body();
-        response = objectMapper.readValue(statusResponse, LoginResponse.class);
+        String statusResponse = doHttpRequest(
+                "/api/status",
+                true,
+                null,
+                sessionId).body;
+        LoginResponse response = objectMapper.readValue(statusResponse, LoginResponse.class);
         Assertions.assertTrue(response.isLogin());
         Assertions.assertEquals(VALID_PARAMETER.getTel(), response.getUser().getTel());
+        return sessionId;
+    }
 
-        //访问 /api/logout
-        //注销登录，注意注销登录也要带cookie，否则服务器不知道是哪个用户
-        HttpRequest
-                .post(getUrl("/api/logout"))
-                .header("Cookie", sessionId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .headers();
+    private List<String> assertLoginWithSmsCodeToObtainCookie() throws JsonProcessingException {
+        //带着验证码进行登录，得到cookie
+        Map<String, List<String>> responseHeaders =
+                doHttpRequest(
+                        "/api/login",
+                        false,
+                        VALID_PARAMETER_CODE,
+                        null).headers;
+        List<String> setCookie = responseHeaders.get("Set-Cookie");
+        Assertions.assertNotNull(setCookie);
+        return setCookie;
+    }
 
-        //再次带着cookie访问 /api/status 处于未登录状态
-        statusResponse = HttpRequest
-                .get(getUrl("/api/status"))
-                .header("Cookie", sessionId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .body();
-        response = objectMapper.readValue(statusResponse, LoginResponse.class);
+    private void assertSendSmsCodeSuccess() throws JsonProcessingException {
+        //发送验证码
+        int responseCode =
+                doHttpRequest(
+                        "/api/code",
+                        false,
+                        VALID_PARAMETER,
+                        null).code;
+        Assertions.assertEquals(HttpStatus.OK.value(), responseCode);
+    }
+
+    private void assertNotLoginAtBeginning() throws JsonProcessingException {
+        //最开始默认情况下访问 /api/status 处于未登录状态
+        String statusResponse =
+                doHttpRequest(
+                        "/api/status",
+                        true,
+                        null,
+                        null).body;
+        LoginResponse response = objectMapper.readValue(statusResponse, LoginResponse.class);
         Assertions.assertFalse(response.isLogin());
     }
 
