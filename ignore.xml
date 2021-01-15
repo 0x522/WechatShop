@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <!--Class传入全限定类名或者正则表达式，其中正则以 ~ 开头-->
+        <Class name="~.*\.generate\..*"/>
+    </Match>
+</FindBugsFilter>
