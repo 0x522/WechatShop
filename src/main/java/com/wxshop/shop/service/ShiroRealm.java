@@ -1,5 +1,6 @@
 package com.wxshop.shop.service;
 
+import com.wxshop.shop.service.VerificationCodeCheckService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;

@@ -5,6 +5,7 @@ import com.wxshop.shop.service.ShiroRealm;
 import com.wxshop.shop.service.UserLoginInterceptor;
 import com.wxshop.shop.service.UserService;
 import com.wxshop.shop.service.VerificationCodeCheckService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -16,7 +17,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.servlet.Filter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
@@ -34,12 +37,21 @@ public class ShiroConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
+    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager, ShiroLoginFilter shiroLoginFilter) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
+
         Map<String, String> pattern = new HashMap<>();
         pattern.put("/api/code", "anon");
         pattern.put("/api/login", "anon");
+        pattern.put("/api/logout", "anon");
+        pattern.put("/api/status", "anon");
+        pattern.put("/**", "authc");
+
+        Map<String, Filter> filterMap = new LinkedHashMap<>();
+        filterMap.put("shiroLoginFilter", shiroLoginFilter);
+        shiroFilterFactoryBean.setFilters(filterMap);
+
         shiroFilterFactoryBean.setFilterChainDefinitionMap(pattern);
         return shiroFilterFactoryBean;
     }
@@ -50,6 +62,7 @@ public class ShiroConfig implements WebMvcConfigurer {
         securityManager.setRealm(shiroRealm);
         securityManager.setCacheManager(new MemoryConstrainedCacheManager());
         securityManager.setSessionManager(new DefaultWebSessionManager());
+        SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }
 

@@ -190,6 +190,15 @@ public class AuthIntegrationTest {
         client.close();
     }
 
+    @Test
+    public void returnUnauthorizedIfNotLogin() {
+        int code = HttpRequest.get(getUrl("/api/any"))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .code();
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), code);
+    }
+
     private String getUrl(String apiName) {
         // 获取集成测试的端口号
         return "http://localhost:" + environment.getProperty("local.server.port") + apiName;
