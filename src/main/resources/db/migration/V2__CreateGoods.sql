@@ -8,7 +8,7 @@ create table goods
     img_url     varchar(1024),
     price       bigint,
     stock       int      not null default 0,
-    status      varchar(16)/*'ok' & 'delete'*/,
+    status      varchar(16)/*'ok' & 'deleted'*/,
     created_at  datetime not null default now(),
     updated_at  datetime not null default now()
 ) ENGINE = InnoDB
