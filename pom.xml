@@ -19,6 +19,13 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>7.5.0</version>
+            <scope>test</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.github.kevinsawicki/http-request -->
         <dependency>
             <groupId>com.github.kevinsawicki</groupId>
@@ -107,7 +114,7 @@
                                         <limit>
                                             <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.40</minimum>
+                                            <minimum>0.00</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -190,7 +197,7 @@
             <plugin>
                 <groupId>org.mybatis.generator</groupId>
                 <artifactId>mybatis-generator-maven-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>1.3.7</version>
                 <dependencies>
                     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
                     <dependency>
@@ -198,7 +205,16 @@
                         <artifactId>mysql-connector-java</artifactId>
                         <version>8.0.22</version>
                     </dependency>
+                    <!-- https://mvnrepository.com/artifact/com.qiukeke/mybatis-generator-limit-plugin -->
+                    <dependency>
+                        <groupId>com.qiukeke</groupId>
+                        <artifactId>mybatis-generator-limit-plugin</artifactId>
+                        <version>1.0.4</version>
+                    </dependency>
                 </dependencies>
+                <configuration>
+                    <overwrite>true</overwrite>
+                </configuration>
             </plugin>
         </plugins>
     </build>

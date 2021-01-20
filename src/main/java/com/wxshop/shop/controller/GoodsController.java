@@ -1,14 +1,12 @@
 package com.wxshop.shop.controller;
 
+import com.wxshop.shop.entity.PageResponse;
 import com.wxshop.shop.entity.Response;
 import com.wxshop.shop.generate.Goods;
 import com.wxshop.shop.service.GoodsService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -23,11 +21,52 @@ public class GoodsController {
         this.goodsService = goodsService;
     }
 
+    @GetMapping("/goods")
+    public @ResponseBody
+    PageResponse<Goods> getGoods(@RequestParam("pageNumber") Integer pageNumber,
+                                 @RequestParam("pageSize") Integer pageSize,
+                                 @RequestParam(value = "shopId", required = false) Integer shopId) {
+        PageResponse<Goods> goods = goodsService.getGoods(pageNumber, pageSize, shopId);
+        return goods;
+    }
+
+
     @PostMapping("/goods")
     public Response<Goods> createGoods(@RequestBody Goods goods, HttpServletResponse response) {
         clean(goods);
         response.setStatus(HttpStatus.SC_CREATED);
-        return Response.of(goodsService.createGoods(goods));
+        try {
+            return Response.of(goodsService.createGoods(goods));
+        } catch (GoodsService.NotAuthorizedForShopException e) {
+            response.setStatus(HttpStatus.SC_FORBIDDEN);
+            return Response.of(null, e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/goods/{id}")
+    public Response<Goods> deleteGoods(@PathVariable("id") Long id, HttpServletResponse response) {
+        try {
+            response.setStatus(HttpStatus.SC_NO_CONTENT);
+            return Response.of(goodsService.deleteGoodsById(id));
+        } catch (GoodsService.NotAuthorizedForShopException e) {
+            response.setStatus(HttpStatus.SC_NOT_FOUND);
+            return Response.of(null, e.getMessage());
+        } catch (GoodsService.ResourceNotFoundException e) {
+            response.setStatus(HttpStatus.SC_FORBIDDEN);
+            return Response.of(null, e.getMessage());
+        }
+    }
+
+    public Response<Goods> updateGoods(Goods goods, HttpServletResponse response) {
+        try {
+            return Response.of(goodsService.updateGoods(goods));
+        } catch (GoodsService.NotAuthorizedForShopException e) {
+            response.setStatus(HttpStatus.SC_NOT_FOUND);
+            return Response.of(null, e.getMessage());
+        } catch (GoodsService.ResourceNotFoundException e) {
+            response.setStatus(HttpStatus.SC_FORBIDDEN);
+            return Response.of(null, e.getMessage());
+        }
     }
 
     private void clean(Goods goods) {
