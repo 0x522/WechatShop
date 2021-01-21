@@ -1,6 +1,7 @@
 package com.wxshop.shop.service;
 
 import com.wxshop.shop.entity.DataStatus;
+import com.wxshop.shop.entity.HttpException;
 import com.wxshop.shop.entity.PageResponse;
 import com.wxshop.shop.generate.*;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 
 import java.util.List;
@@ -37,7 +39,6 @@ class GoodsServiceTest {
         User user = new User();
         user.setId(1L);
         UserContext.setCurrentUser(user);
-        lenient().when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
     }
 
     @AfterEach
@@ -47,6 +48,7 @@ class GoodsServiceTest {
 
     @Test
     public void createGoodsSucceedIfUserIsOwner() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
         when(shop.getOwnerUserId()).thenReturn(1L);
         when(goodsMapper.insert(goods)).thenReturn(123);
         Assertions.assertEquals(goods, goodsService.createGoods(goods));
@@ -55,38 +57,53 @@ class GoodsServiceTest {
 
     @Test
     public void createGoodsFailedIfUserIsNotOwner() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
         when(shop.getOwnerUserId()).thenReturn(2L);
-        assertThrows(GoodsService.NotAuthorizedForShopException.class, () -> {
+        HttpException thrownException = assertThrows(HttpException.class, () -> {
             goodsService.createGoods(goods);
         });
+        assertEquals(HttpStatus.FORBIDDEN.value(), thrownException.getStatusCode());
     }
 
     @Test
     public void throwExceptionIfGoodsNotFound() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
         long goodsToBeDeleted = 123;
         when(shop.getOwnerUserId()).thenReturn(1L);
         when(goodsMapper.selectByPrimaryKey(goodsToBeDeleted)).thenReturn(null);
-        assertThrows(GoodsService.ResourceNotFoundException.class, () -> {
+        HttpException thrownException = assertThrows(HttpException.class, () -> {
             goodsService.deleteGoodsById(goodsToBeDeleted);
         });
+        assertEquals(HttpStatus.NOT_FOUND.value(), thrownException.getStatusCode());
     }
 
     @Test
     public void deleteGoodsThrowExceptionIfUserIsNotOwner() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
         long goodsToBeDeleted = 123;
         when(shop.getOwnerUserId()).thenReturn(2L);
-        assertThrows(GoodsService.NotAuthorizedForShopException.class, () -> {
+        HttpException thrownException = assertThrows(HttpException.class, () -> {
             goodsService.deleteGoodsById(goodsToBeDeleted);
         });
+        assertEquals(HttpStatus.FORBIDDEN.value(), thrownException.getStatusCode());
     }
 
     @Test
-    public void deleteGoodsSucceed() throws GoodsService.ResourceNotFoundException {
+    public void deleteGoodsSucceed() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
         long goodsToBeDeleted = 123;
         when(shop.getOwnerUserId()).thenReturn(1L);
         when(goodsMapper.selectByPrimaryKey(goodsToBeDeleted)).thenReturn(goods);
         assertEquals(goods, goodsService.deleteGoodsById(goodsToBeDeleted));
         verify(goods).setStatus(DataStatus.DELETED.getName());
+    }
+
+    @Test
+    public void updateGoodsSucceed() {
+        when(shopMapper.selectByPrimaryKey(anyLong())).thenReturn(shop);
+        when(shop.getOwnerUserId()).thenReturn(1L);
+        when(goodsMapper.updateByExample(any(), any())).thenReturn(1);
+        assertEquals(goods, goodsService.updateGoods(goods));
     }
 
     @Test
@@ -118,11 +135,6 @@ class GoodsServiceTest {
         assertEquals(10, result.getPageSize());
         assertEquals(mockData, result.getData());
     }
-
-    @Test
-    public void updateGoodsSucceed() throws GoodsService.ResourceNotFoundException {
-        when(shop.getOwnerUserId()).thenReturn(1L);
-        when(goodsMapper.updateByExample(any(), any())).thenReturn(1);
-        assertEquals(goods, goodsService.updateGoods(goods));
-    }
 }
+
+

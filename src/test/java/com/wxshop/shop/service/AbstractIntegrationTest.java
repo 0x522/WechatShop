@@ -1,6 +1,7 @@
 package com.wxshop.shop.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.wxshop.shop.entity.LoginResponse;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
 import java.util.List;
 import java.util.Map;
 
@@ -103,10 +105,10 @@ public class AbstractIntegrationTest {
             return this;
         }
 
-//        public <T> T asJsonObject(TypeReference<T> typeReference) throws JsonProcessingException {
-//            T result = objectMapper.readValue(body, typeReference);
-//            return result;
-//        }
+        public <T> T asJsonObject(TypeReference<T> typeReference) throws JsonProcessingException {
+            T result = objectMapper.readValue(body, typeReference);
+            return result;
+        }
     }
 
     private HttpRequest createRequest(String url, String method) {

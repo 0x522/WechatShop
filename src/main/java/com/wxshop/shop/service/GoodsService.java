@@ -1,6 +1,7 @@
 package com.wxshop.shop.service;
 
 import com.wxshop.shop.entity.DataStatus;
+import com.wxshop.shop.entity.HttpException;
 import com.wxshop.shop.entity.PageResponse;
 import com.wxshop.shop.generate.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,41 +25,42 @@ public class GoodsService {
     public Goods createGoods(Goods goods) {
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
         if (Objects.equals(shop.getOwnerUserId(), UserContext.getCurrentUser().getId())) {
+            goods.setStatus(DataStatus.OK.getName());
             goods.setId((long) goodsMapper.insert(goods));
             return goods;
         } else {
-            throw new NotAuthorizedForShopException("无权访问！");
+            throw HttpException.forbidden("无权访问！");
         }
     }
 
-    public Goods deleteGoodsById(Long goodsId) throws ResourceNotFoundException {
+    public Goods deleteGoodsById(Long goodsId) {
         Shop shop = shopMapper.selectByPrimaryKey(goodsId);
         if (shop == null || Objects.equals(shop.getOwnerUserId(), UserContext.getCurrentUser().getId())) {
             Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
             if (goods == null) {
-                throw new ResourceNotFoundException("商品未找到！");
+                throw HttpException.notFound("未找到商品!");
             }
             goods.setStatus(DataStatus.DELETED.getName());
             goodsMapper.updateByPrimaryKey(goods);
             return goods;
         } else {
-            throw new NotAuthorizedForShopException("无权访问！");
+            throw HttpException.forbidden("无权访问!");
         }
 
     }
 
-    public Goods updateGoods(Goods goods) throws ResourceNotFoundException {
+    public Goods updateGoods(Goods goods) {
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
-        if (Objects.equals(shop.getOwnerUserId(), UserContext.getCurrentUser().getId())) {
+        if (shop == null || Objects.equals(shop.getOwnerUserId(), UserContext.getCurrentUser().getId())) {
             GoodsExample byId = new GoodsExample();
             byId.createCriteria().andIdEqualTo(goods.getId());
             int affectRows = goodsMapper.updateByExample(goods, byId);
             if (affectRows == 0) {
-                throw new ResourceNotFoundException("未找到！");
+                throw HttpException.notFound("未找到商品!");
             }
             return goods;
         } else {
-            throw new NotAuthorizedForShopException("无权访问！");
+            throw HttpException.forbidden("无权访问!");
         }
     }
 
@@ -86,17 +88,4 @@ public class GoodsService {
         List<Goods> pagedGoods = goodsMapper.selectByExample(goodsExample);
         return PageResponse.pagedData(pageNum, pageSize, totalPage, pagedGoods);
     }
-
-    public static class NotAuthorizedForShopException extends RuntimeException {
-        public NotAuthorizedForShopException(String message) {
-            super(message);
-        }
-    }
-
-    public static class ResourceNotFoundException extends RuntimeException {
-        public ResourceNotFoundException(String message) {
-            super(message);
-        }
-    }
-
 }

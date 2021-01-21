@@ -158,7 +158,7 @@
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <enableRulesSummary>false</enableRulesSummary>
                     <excludes>
-                        **/generate/**/*
+                        **/generate/**
                     </excludes>
                 </configuration>
                 <executions>

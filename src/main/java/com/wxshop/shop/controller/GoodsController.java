@@ -1,5 +1,6 @@
 package com.wxshop.shop.controller;
 
+import com.wxshop.shop.entity.HttpException;
 import com.wxshop.shop.entity.PageResponse;
 import com.wxshop.shop.entity.Response;
 import com.wxshop.shop.generate.Goods;
@@ -37,8 +38,8 @@ public class GoodsController {
         response.setStatus(HttpStatus.SC_CREATED);
         try {
             return Response.of(goodsService.createGoods(goods));
-        } catch (GoodsService.NotAuthorizedForShopException e) {
-            response.setStatus(HttpStatus.SC_FORBIDDEN);
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
@@ -48,23 +49,18 @@ public class GoodsController {
         try {
             response.setStatus(HttpStatus.SC_NO_CONTENT);
             return Response.of(goodsService.deleteGoodsById(id));
-        } catch (GoodsService.NotAuthorizedForShopException e) {
-            response.setStatus(HttpStatus.SC_NOT_FOUND);
-            return Response.of(null, e.getMessage());
-        } catch (GoodsService.ResourceNotFoundException e) {
-            response.setStatus(HttpStatus.SC_FORBIDDEN);
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
 
+    @PatchMapping("/goods/{id}")
     public Response<Goods> updateGoods(Goods goods, HttpServletResponse response) {
         try {
             return Response.of(goodsService.updateGoods(goods));
-        } catch (GoodsService.NotAuthorizedForShopException e) {
-            response.setStatus(HttpStatus.SC_NOT_FOUND);
-            return Response.of(null, e.getMessage());
-        } catch (GoodsService.ResourceNotFoundException e) {
-            response.setStatus(HttpStatus.SC_FORBIDDEN);
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
