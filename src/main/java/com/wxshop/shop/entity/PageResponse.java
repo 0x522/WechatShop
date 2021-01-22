@@ -3,7 +3,7 @@ package com.wxshop.shop.entity;
 import java.util.List;
 
 public class PageResponse<T> {
-    private Integer pageNumber;
+    private Integer pageNum;
     private Integer pageSize;
     private Integer totalPage;
     private List<T> data;
@@ -11,29 +11,23 @@ public class PageResponse<T> {
     public PageResponse() {
     }
 
-    private PageResponse(Integer pageNumber, Integer pageSize, Integer totalPage, List<T> data) {
-        this.pageNumber = pageNumber;
+    private PageResponse(Integer pageNum, Integer pageSize, Integer totalPage, List<T> data) {
+        this.pageNum = pageNum;
         this.pageSize = pageSize;
         this.totalPage = totalPage;
         this.data = data;
     }
 
-    public Integer getPageNumber() {
-        return pageNumber;
-    }
 
-    public static <T> PageResponse<T> pagedData(int pageNumber, int pageSize, int totalPage, List<T> data) {
+    public static <T> PageResponse<T> pagedData(int pageNum, int pageSize, int totalPage, List<T> data) {
         PageResponse<T> result = new PageResponse<>();
         result.setData(data);
-        result.setPageNumber(pageNumber);
+        result.setPageNum(pageNum);
         result.setTotalPage(totalPage);
         result.setPageSize(pageSize);
         return result;
     }
 
-    public void setPageNumber(Integer pageNumber) {
-        this.pageNumber = pageNumber;
-    }
 
     public Integer getPageSize() {
         return pageSize;
@@ -57,5 +51,13 @@ public class PageResponse<T> {
 
     public void setData(List<T> data) {
         this.data = data;
+    }
+
+    public Integer getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(Integer pageNum) {
+        this.pageNum = pageNum;
     }
 }

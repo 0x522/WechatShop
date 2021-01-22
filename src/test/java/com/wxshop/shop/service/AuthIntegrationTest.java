@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static com.wxshop.shop.service.TelVerificationServiceTest.*;
 
 
@@ -62,7 +63,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void returnHttpBadRequestWhenParameterHasEmpty() throws JsonProcessingException {
+    public void returnHttpBadRequestWhenParameterIsCorrect() throws JsonProcessingException {
         int responseCode = HttpRequest.post(getUrl("/api/v1/code"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE)

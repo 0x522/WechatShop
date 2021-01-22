@@ -24,7 +24,7 @@ import java.util.Map;
 
 @Configuration
 public class ShiroConfig implements WebMvcConfigurer {
-    private final UserService userService;
+    private UserService userService;
 
     @Autowired
     public ShiroConfig(UserService userService) {
@@ -59,9 +59,11 @@ public class ShiroConfig implements WebMvcConfigurer {
     @Bean
     public SecurityManager securityManager(ShiroRealm shiroRealm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+
         securityManager.setRealm(shiroRealm);
-        securityManager.setCacheManager(new MemoryConstrainedCacheManager());
+//        securityManager.setCacheManager(cacheManager);
         securityManager.setSessionManager(new DefaultWebSessionManager());
+//        securityManager.setRememberMeManager(rememberMeManager());
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }

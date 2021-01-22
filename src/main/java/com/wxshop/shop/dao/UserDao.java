@@ -3,33 +3,29 @@ package com.wxshop.shop.dao;
 import com.wxshop.shop.generate.User;
 import com.wxshop.shop.generate.UserExample;
 import com.wxshop.shop.generate.UserMapper;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class UserDao {
-    private final SqlSessionFactory sqlSessionFactory;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserDao(SqlSessionFactory sqlSessionFactory) {
-        this.sqlSessionFactory = sqlSessionFactory;
+    public UserDao(UserMapper userMapper) {
+        this.userMapper = userMapper;
     }
 
+
     public void insertUser(User user) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
-            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-            mapper.insert(user);
-        }
+        userMapper.insert(user);
     }
 
     public User getUserByTel(String tel) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
-            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-            UserExample userExample = new UserExample();
-            userExample.createCriteria().andTelEqualTo(tel);
-            return mapper.selectByExample(userExample).get(0);
-        }
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andTelEqualTo(tel);
+        List<User> users = userMapper.selectByExample(userExample);
+        return users.isEmpty() ? null : users.get(0);
     }
 }

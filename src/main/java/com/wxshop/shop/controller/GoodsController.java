@@ -56,7 +56,7 @@ public class GoodsController {
     }
 
     @PatchMapping("/goods/{id}")
-    public Response<Goods> updateGoods(Goods goods, HttpServletResponse response) {
+    public Response<Goods> updateGoods(@RequestBody Goods goods, HttpServletResponse response) {
         try {
             return Response.of(goodsService.updateGoods(goods));
         } catch (HttpException e) {

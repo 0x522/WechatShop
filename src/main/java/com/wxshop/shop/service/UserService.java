@@ -4,8 +4,10 @@ import com.wxshop.shop.dao.UserDao;
 import com.wxshop.shop.generate.User;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 
 @Service
@@ -24,7 +26,7 @@ public class UserService {
         user.setUpdatedAt(new Date());
         try {
             userDao.insertUser(user);
-        } catch (PersistenceException e) {
+        } catch (DuplicateKeyException e) {
             return userDao.getUserByTel(tel);
         }
 

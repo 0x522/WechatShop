@@ -116,7 +116,7 @@ class GoodsServiceTest {
         PageResponse<Goods> result = goodsService.getGoods(pageNum, pageSize, null);
 
         assertEquals(6, result.getTotalPage());
-        assertEquals(5, result.getPageNumber());
+        assertEquals(5, result.getPageNum());
         assertEquals(10, result.getPageSize());
         assertEquals(mockData, result.getData());
     }
@@ -131,7 +131,7 @@ class GoodsServiceTest {
         PageResponse<Goods> result = goodsService.getGoods(pageNum, pageSize, 1);
 
         assertEquals(10, result.getTotalPage());
-        assertEquals(5, result.getPageNumber());
+        assertEquals(5, result.getPageNum());
         assertEquals(10, result.getPageSize());
         assertEquals(mockData, result.getData());
     }
