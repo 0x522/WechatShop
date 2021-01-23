@@ -24,9 +24,18 @@ public class ShoppingCartController {
     @PostMapping("/shoppingCart")
     public Response<ShoppingCartData> addToShoppingCart(@RequestBody AddToShoppingCartRequest request) {
         try {
-            return Response.of(shoppingCartService.addToShoppingCart(request));
+            return Response.of(shoppingCartService.addToShoppingCart(request, UserContext.getCurrentUser().getId()));
         } catch (HttpException e) {
-            return Response.of(null, e.getMessage());
+            return Response.of(e.getMessage(), null);
+        }
+    }
+
+    @DeleteMapping("/shoppingCart/{goodsId}")
+    public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") Long goodsId) {
+        try {
+            return Response.of(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
+        } catch (HttpException e) {
+            return Response.of(e.getMessage(), null);
         }
     }
 

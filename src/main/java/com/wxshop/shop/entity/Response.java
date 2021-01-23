@@ -6,35 +6,35 @@ public class Response<T> {
 
     private String message;
 
-    public static <T> Response<T> of(T data, String message) {
-        return new Response<T>(data, message);
+    public static <T> Response<T> of(String message, T data) {
+        return new Response<T>(message, data);
     }
 
     public static <T> Response<T> of(T data) {
-        return new Response<T>(data);
+        return new Response<T>(null, data);
     }
 
-    public static <T> Response<T> of(String message) {
-        return new Response<T>(null, message);
+    public Response() {
     }
 
-    public String getMessage() {
-        return message;
+    public Response(String message, T data) {
+        this.message = message;
+        this.data = data;
     }
 
     public T getData() {
         return data;
     }
 
-    private Response(T data, String message) {
+    public void setData(T data) {
         this.data = data;
+    }
+
+    public void setMessage(String message) {
         this.message = message;
     }
 
-    private Response(T data) {
-        this.data = data;
-    }
-
-    private Response() {
+    public String getMessage() {
+        return message;
     }
 }

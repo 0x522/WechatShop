@@ -1,11 +1,14 @@
 package com.wxshop.shop.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wxshop.shop.generate.Shop;
 
 import java.util.List;
 
 public class ShoppingCartData {
+    @JsonProperty("shop")
     private Shop shop;
+    @JsonProperty("goods")
     private List<ShoppingCartGoods> goods;
 
     public ShoppingCartData() {

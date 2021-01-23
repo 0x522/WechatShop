@@ -62,8 +62,15 @@
                  JOIN SHOP on SHOPPING_CART.SHOP_ID = SHOP.ID
         WHERE SHOPPING_CART.SHOP_ID = #{shopId}
           AND SHOPPING_CART.USER_ID = #{userId}
-
+          AND SHOPPING_CART.STATUS = 'ok'
     </select>
+    <delete id="deleteShoppingCart" parameterType="Map">
+        UPDATE SHOPPING_CART
+        SET STATUS     = 'DELETED',
+            UPDATED_AT = now()
+        WHERE USER_ID = #{userId}
+          AND GOODS_ID = #{goodsId}
+    </delete>
     <resultMap id="getShoppingCartResultMap" type="ShoppingCartData">
         <association property="shop" javaType="Shop">
             <id property="id" column="SHOP_ID"/>

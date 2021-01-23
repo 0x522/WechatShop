@@ -1,6 +1,5 @@
 package com.wxshop.shop.service;
 
-import com.alibaba.fastjson.JSON;
 import com.wxshop.shop.controller.ShoppingCartController;
 import com.wxshop.shop.dao.ShoppingCartQueryMapper;
 import com.wxshop.shop.entity.*;
@@ -60,7 +59,7 @@ public class ShoppingCartService {
         return result;
     }
 
-    public ShoppingCartData addToShoppingCart(ShoppingCartController.AddToShoppingCartRequest request) {
+    public ShoppingCartData addToShoppingCart(ShoppingCartController.AddToShoppingCartRequest request, long userId) {
         List<Long> goodsId = request.getGoods()
                 .stream()
                 .map(ShoppingCartController.AddToShoppingCartItem::getId)
@@ -72,12 +71,13 @@ public class ShoppingCartService {
         goodsExample.createCriteria().andIdIn(goodsId);
         List<Goods> goods = goodsMapper.selectByExample(goodsExample);
 
+        Map<Long, Goods> idToGoodsMap = goods.stream().collect(toMap(Goods::getId, x -> x));
+
         if (goods.stream().map(Goods::getShopId).collect(toSet()).size() != 1) {
-            log.debug("非法请求:{},{}", JSON.toJSON(goodsId), JSON.toJSON(goods));
+            log.debug("非法请求:{},{}", goodsId, idToGoodsMap.values());
             throw HttpException.badRequest("商品ID非法!");
         }
 
-        Map<Long, Goods> idToGoodsMap = goods.stream().collect(toMap(Goods::getId, x -> x));
         List<ShoppingCart> shoppingCartRows = request.getGoods()
                 .stream()
                 .map(item -> toShoppingCartRow(item, idToGoodsMap))
@@ -89,9 +89,7 @@ public class ShoppingCartService {
             shoppingCartRows.forEach(mapper::insert);
             sqlSession.commit();
         }
-        return merge(shoppingCartQueryMapper.selectShoppingCartDataByUserIdShopId(
-                UserContext.getCurrentUser().getId(),
-                goods.get(0).getShopId()));
+        return getLatestShoppingCartDataByUserIdShopId(goods.get(0).getShopId(), userId);
     }
 
     private ShoppingCart toShoppingCartRow(ShoppingCartController.AddToShoppingCartItem item,
@@ -109,5 +107,19 @@ public class ShoppingCartService {
         result.setCreatedAt(new Date());
         result.setUpdatedAt(new Date());
         return result;
+    }
+
+    public ShoppingCartData deleteGoodsInShoppingCart(Long goodsId, Long userId) {
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+        if (goods == null) {
+            throw HttpException.notFound(goodsId + " 商品未找到!");
+        }
+        shoppingCartQueryMapper.deleteShoppingCart(goodsId, userId);
+        return getLatestShoppingCartDataByUserIdShopId(userId, goods.getShopId());
+    }
+
+    private ShoppingCartData getLatestShoppingCartDataByUserIdShopId(Long userId, Long shopId) {
+        List<ShoppingCartData> result = shoppingCartQueryMapper.selectShoppingCartDataByUserIdShopId(userId, shopId);
+        return merge(result);
     }
 }

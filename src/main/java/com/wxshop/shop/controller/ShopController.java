@@ -44,7 +44,7 @@ public class ShopController {
             return Response.of(updatedShop);
         } catch (HttpException e) {
             response.setStatus(e.getStatusCode());
-            return Response.of(null, e.getMessage());
+            return Response.of(e.getMessage(), null);
         }
     }
 
@@ -55,7 +55,7 @@ public class ShopController {
             return Response.of(shopService.deleteShop(shopId, UserContext.getCurrentUser().getId()));
         } catch (HttpException e) {
             response.setStatus(e.getStatusCode());
-            return Response.of(null, e.getMessage());
+            return Response.of(e.getMessage(), null);
         }
     }
 }
