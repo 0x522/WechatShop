@@ -2,12 +2,9 @@ package com.wxshop.shop.service;
 
 import com.wxshop.shop.dao.UserDao;
 import com.wxshop.shop.generate.User;
-import org.apache.ibatis.exceptions.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 
 @Service

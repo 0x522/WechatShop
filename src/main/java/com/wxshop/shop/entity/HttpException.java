@@ -19,6 +19,10 @@ public class HttpException extends RuntimeException {
         return new HttpException(message, HttpStatus.NOT_FOUND.value());
     }
 
+    public static HttpException badRequest(String message) {
+        return new HttpException(message, HttpStatus.BAD_REQUEST.value());
+    }
+
     public int getStatusCode() {
         return statusCode;
     }

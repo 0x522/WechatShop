@@ -1,25 +1,34 @@
 package com.wxshop.shop.service;
 
+import com.alibaba.fastjson.JSON;
+import com.wxshop.shop.controller.ShoppingCartController;
 import com.wxshop.shop.dao.ShoppingCartQueryMapper;
-import com.wxshop.shop.entity.PageResponse;
-import com.wxshop.shop.entity.ShoppingCartData;
-import com.wxshop.shop.entity.ShoppingCartGoods;
+import com.wxshop.shop.entity.*;
+import com.wxshop.shop.generate.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 
+@Slf4j
 @Service
 public class ShoppingCartService {
     private ShoppingCartQueryMapper shoppingCartQueryMapper;
+    private GoodsMapper goodsMapper;
+    private SqlSessionFactory sqlSessionFactory;
 
     @Autowired
-    public ShoppingCartService(ShoppingCartQueryMapper shoppingCartQueryMapper) {
+    public ShoppingCartService(ShoppingCartQueryMapper shoppingCartQueryMapper, ShoppingCartMapper shoppingCartMapper, GoodsMapper goodsMapper, SqlSessionFactory sqlSessionFactory) {
         this.shoppingCartQueryMapper = shoppingCartQueryMapper;
+        this.goodsMapper = goodsMapper;
+        this.sqlSessionFactory = sqlSessionFactory;
     }
 
 
@@ -48,6 +57,57 @@ public class ShoppingCartService {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
         result.setGoods(goods);
+        return result;
+    }
+
+    public ShoppingCartData addToShoppingCart(ShoppingCartController.AddToShoppingCartRequest request) {
+        List<Long> goodsId = request.getGoods()
+                .stream()
+                .map(ShoppingCartController.AddToShoppingCartItem::getId)
+                .collect(Collectors.toList());
+        if (goodsId.isEmpty()) {
+            throw HttpException.badRequest("商品ID为空!");
+        }
+        GoodsExample goodsExample = new GoodsExample();
+        goodsExample.createCriteria().andIdIn(goodsId);
+        List<Goods> goods = goodsMapper.selectByExample(goodsExample);
+
+        if (goods.stream().map(Goods::getShopId).collect(toSet()).size() != 1) {
+            log.debug("非法请求:{},{}", JSON.toJSON(goodsId), JSON.toJSON(goods));
+            throw HttpException.badRequest("商品ID非法!");
+        }
+
+        Map<Long, Goods> idToGoodsMap = goods.stream().collect(toMap(Goods::getId, x -> x));
+        List<ShoppingCart> shoppingCartRows = request.getGoods()
+                .stream()
+                .map(item -> toShoppingCartRow(item, idToGoodsMap))
+                .filter(Objects::nonNull)
+                .collect(toList());
+
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            ShoppingCartMapper mapper = sqlSession.getMapper(ShoppingCartMapper.class);
+            shoppingCartRows.forEach(mapper::insert);
+            sqlSession.commit();
+        }
+        return merge(shoppingCartQueryMapper.selectShoppingCartDataByUserIdShopId(
+                UserContext.getCurrentUser().getId(),
+                goods.get(0).getShopId()));
+    }
+
+    private ShoppingCart toShoppingCartRow(ShoppingCartController.AddToShoppingCartItem item,
+                                           Map<Long, Goods> idToGoodsMap) {
+        Goods goods = idToGoodsMap.get(item.getId());
+        if (goods == null) {
+            return null;
+        }
+        ShoppingCart result = new ShoppingCart();
+        result.setGoodsId(item.getId());
+        result.setNumber(item.getNumber());
+        result.setShopId(goods.getShopId());
+        result.setStatus(DataStatus.OK.getName());
+        result.setUserId(UserContext.getCurrentUser().getId());
+        result.setCreatedAt(new Date());
+        result.setUpdatedAt(new Date());
         return result;
     }
 }

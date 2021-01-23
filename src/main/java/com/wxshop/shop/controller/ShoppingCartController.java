@@ -1,6 +1,8 @@
 package com.wxshop.shop.controller;
 
+import com.wxshop.shop.entity.HttpException;
 import com.wxshop.shop.entity.PageResponse;
+import com.wxshop.shop.entity.Response;
 import com.wxshop.shop.entity.ShoppingCartData;
 import com.wxshop.shop.service.ShoppingCartService;
 import com.wxshop.shop.service.UserContext;
@@ -20,8 +22,12 @@ public class ShoppingCartController {
     }
 
     @PostMapping("/shoppingCart")
-    public void addToShoppingCart(@RequestBody AddToShoppingCartRequest request) {
-
+    public Response<ShoppingCartData> addToShoppingCart(@RequestBody AddToShoppingCartRequest request) {
+        try {
+            return Response.of(shoppingCartService.addToShoppingCart(request));
+        } catch (HttpException e) {
+            return Response.of(null, e.getMessage());
+        }
     }
 
     @GetMapping("/shoppingCart")
@@ -31,13 +37,24 @@ public class ShoppingCartController {
     }
 
     public static class AddToShoppingCartRequest {
-        List<AddToShoppingCartItem> goods;
+        private List<AddToShoppingCartItem> goods;
 
+        public List<AddToShoppingCartItem> getGoods() {
+            return goods;
+        }
+
+        public void setGoods(List<AddToShoppingCartItem> goods) {
+            this.goods = goods;
+        }
     }
 
     public static class AddToShoppingCartItem {
         long id;
         int number;
+
+        public AddToShoppingCartItem() {
+
+        }
 
         public AddToShoppingCartItem(long id, int number) {
             this.id = id;

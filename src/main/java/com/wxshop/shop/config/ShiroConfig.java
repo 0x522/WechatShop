@@ -6,7 +6,6 @@ import com.wxshop.shop.service.UserLoginInterceptor;
 import com.wxshop.shop.service.UserService;
 import com.wxshop.shop.service.VerificationCodeCheckService;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;

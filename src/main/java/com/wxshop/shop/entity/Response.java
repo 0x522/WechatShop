@@ -1,5 +1,6 @@
 package com.wxshop.shop.entity;
 
+
 public class Response<T> {
     private T data;
 
@@ -10,7 +11,11 @@ public class Response<T> {
     }
 
     public static <T> Response<T> of(T data) {
-        return new Response<T>(data, null);
+        return new Response<T>(data);
+    }
+
+    public static <T> Response<T> of(String message) {
+        return new Response<T>(null, message);
     }
 
     public String getMessage() {
@@ -24,6 +29,10 @@ public class Response<T> {
     private Response(T data, String message) {
         this.data = data;
         this.message = message;
+    }
+
+    private Response(T data) {
+        this.data = data;
     }
 
     private Response() {
