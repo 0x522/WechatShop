@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.cyt</groupId>
+        <groupId>com.wxshop</groupId>
         <artifactId>wxshop-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -13,12 +13,12 @@
     <name>wxshop-main</name>
     <description>wxshop-main</description>
 
-
     <dependencies>
         <dependency>
-            <groupId>com.cyt</groupId>
+            <groupId>com.wxshop</groupId>
             <artifactId>wxshop-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <type>pom</type>
         </dependency>
         <!-- Dubbo dependency-->
         <dependency>
