@@ -3,10 +3,12 @@ package com.wxshop.shop.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.wxshop.shop.WechatShopApplication;
+import com.wxshop.shop.api.OrderService;
 import com.wxshop.shop.entity.LoginResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +22,9 @@ import static com.wxshop.shop.service.TelVerificationServiceTest.*;
 @SpringBootTest(classes = WechatShopApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {"spring.config.location=classpath:test-application.yml"})
 public class AuthIntegrationTest extends AbstractIntegrationTest {
+    @Autowired
+    OrderService orderService;
+
     @Test
     public void loginLogoutTest() throws JsonProcessingException {
         String sessionId = loginAndGetCookie().cookie;
