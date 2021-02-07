@@ -3,7 +3,7 @@ package com.wxshop.shop.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.wxshop.shop.WechatShopApplication;
-import com.wxshop.shop.api.OrderService;
+import com.wxshop.shop.api.rpc.OrderService;
 import com.wxshop.shop.entity.LoginResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

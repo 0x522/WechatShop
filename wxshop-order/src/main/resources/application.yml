@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: wxshop-orderservice
+wxshop:
+  orderservice:
+    version: 0.0.1
+dubbo:
+  scan:
+    base-packages: com.wxshop.shop.order.service
+  registry:
+    address: zookeeper://127.0.0.1:2181
+server:
+  port: 8001
