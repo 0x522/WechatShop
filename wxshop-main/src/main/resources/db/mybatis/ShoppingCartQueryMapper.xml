@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wxshop.shop.dao.ShoppingCartQueryMapper">
     <select id="countHowManyShopsInUserShoppingCart" resultType="int" parameterType="long">
-        SELECT COUNT(DISTINCT SHOPPING_CART.SHOP_ID)
+        SELECT COUNT(DISTINCT wxshop.SHOPPING_CART.SHOP_ID)
         from SHOPPING_CART
         where USER_ID = #{userId}
           AND STATUS = 'ok'

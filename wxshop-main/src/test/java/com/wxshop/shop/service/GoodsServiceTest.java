@@ -1,6 +1,6 @@
 package com.wxshop.shop.service;
 
-import com.wxshop.shop.entity.DataStatus;
+import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.entity.HttpException;
 import com.wxshop.shop.entity.PageResponse;
 import com.wxshop.shop.generate.*;

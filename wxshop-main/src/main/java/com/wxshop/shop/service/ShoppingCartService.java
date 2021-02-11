@@ -1,5 +1,6 @@
 package com.wxshop.shop.service;
 
+import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.controller.ShoppingCartController;
 import com.wxshop.shop.dao.ShoppingCartQueryMapper;
 import com.wxshop.shop.entity.*;
@@ -22,12 +23,14 @@ public class ShoppingCartService {
     private ShoppingCartQueryMapper shoppingCartQueryMapper;
     private GoodsMapper goodsMapper;
     private SqlSessionFactory sqlSessionFactory;
+    private GoodsService goodsService;
 
     @Autowired
-    public ShoppingCartService(ShoppingCartQueryMapper shoppingCartQueryMapper, ShoppingCartMapper shoppingCartMapper, GoodsMapper goodsMapper, SqlSessionFactory sqlSessionFactory) {
+    public ShoppingCartService(ShoppingCartQueryMapper shoppingCartQueryMapper, ShoppingCartMapper shoppingCartMapper, GoodsMapper goodsMapper, SqlSessionFactory sqlSessionFactory, GoodsService goodsService) {
         this.shoppingCartQueryMapper = shoppingCartQueryMapper;
         this.goodsMapper = goodsMapper;
         this.sqlSessionFactory = sqlSessionFactory;
+        this.goodsService = goodsService;
     }
 
 
@@ -51,7 +54,7 @@ public class ShoppingCartService {
     private ShoppingCartData merge(List<ShoppingCartData> goodsOfSameShop) {
         ShoppingCartData result = new ShoppingCartData();
         result.setShop(goodsOfSameShop.get(0).getShop());
-        List<ShoppingCartGoods> goods = goodsOfSameShop.stream()
+        List<GoodsWithNumber> goods = goodsOfSameShop.stream()
                 .map(ShoppingCartData::getGoods)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -67,14 +70,11 @@ public class ShoppingCartService {
         if (goodsId.isEmpty()) {
             throw HttpException.badRequest("商品ID为空!");
         }
-        GoodsExample goodsExample = new GoodsExample();
-        goodsExample.createCriteria().andIdIn(goodsId);
-        List<Goods> goods = goodsMapper.selectByExample(goodsExample);
 
-        Map<Long, Goods> idToGoodsMap = goods.stream().collect(toMap(Goods::getId, x -> x));
+        Map<Long, Goods> idToGoodsMap = goodsService.getIdToGoodsMap(goodsId);
 
-        if (goods.stream().map(Goods::getShopId).collect(toSet()).size() != 1) {
-            log.debug("非法请求:{},{}", goodsId, idToGoodsMap.values());
+        if (idToGoodsMap.values().stream().map(Goods::getShopId).collect(toSet()).size() != 1) {
+            log.error("非法请求:{},{}", goodsId, idToGoodsMap.values());
             throw HttpException.badRequest("商品ID非法!");
         }
 
@@ -89,7 +89,7 @@ public class ShoppingCartService {
             shoppingCartRows.forEach(mapper::insert);
             sqlSession.commit();
         }
-        return getLatestShoppingCartDataByUserIdShopId(goods.get(0).getShopId(), userId);
+        return getLatestShoppingCartDataByUserIdShopId(new ArrayList<>(idToGoodsMap.values()).get(0).getShopId(), userId);
     }
 
     private ShoppingCart toShoppingCartRow(ShoppingCartController.AddToShoppingCartItem item,

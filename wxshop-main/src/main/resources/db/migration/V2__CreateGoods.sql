@@ -7,7 +7,7 @@ CREATE TABLE GOODS
     DETAILS     TEXT,
     IMG_URL     VARCHAR(1024),
     PRICE       BIGINT,      -- 单位 分
-    STOCK       INT       NOT NULL DEFAULT 0,
+    STOCK       INT      NOT NULL DEFAULT 0,
     STATUS      VARCHAR(16), -- 'ok' 正常 'deleted' 已经删除
     CREATED_AT  DATETIME NOT NULL DEFAULT NOW(),
     UPDATED_AT  DATETIME NOT NULL DEFAULT NOW()

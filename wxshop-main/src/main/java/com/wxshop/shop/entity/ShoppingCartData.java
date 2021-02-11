@@ -9,12 +9,12 @@ public class ShoppingCartData {
     @JsonProperty("shop")
     private Shop shop;
     @JsonProperty("goods")
-    private List<ShoppingCartGoods> goods;
+    private List<GoodsWithNumber> goods;
 
     public ShoppingCartData() {
     }
 
-    public ShoppingCartData(Shop shop, List<ShoppingCartGoods> goods) {
+    public ShoppingCartData(Shop shop, List<GoodsWithNumber> goods) {
         this.shop = shop;
         this.goods = goods;
     }
@@ -27,11 +27,11 @@ public class ShoppingCartData {
         this.shop = shop;
     }
 
-    public List<ShoppingCartGoods> getGoods() {
+    public List<GoodsWithNumber> getGoods() {
         return goods;
     }
 
-    public void setGoods(List<ShoppingCartGoods> goods) {
+    public void setGoods(List<GoodsWithNumber> goods) {
         this.goods = goods;
     }
 }

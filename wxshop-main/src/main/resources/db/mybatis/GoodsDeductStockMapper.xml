@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wxshop.shop.dao.GoodsDeductStockMapper">
+    <update id="deductStock" parameterType="GoodsInfo">
+        update wxshop.GOODS
+        set STOCK = STOCK - #{number}
+        where ID = #{id}
+          and STATUS = 'ok'
+          and STOCK >= #{number}
+    </update>
+</mapper>

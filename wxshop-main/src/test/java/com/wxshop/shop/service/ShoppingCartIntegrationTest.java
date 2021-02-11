@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import com.wxshop.shop.WechatShopApplication;
+import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.controller.ShoppingCartController;
 import com.wxshop.shop.entity.*;
+import com.wxshop.shop.generate.Goods;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,10 +44,10 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                         .map(Goods::getId).collect(toList()));
         assertEquals(Arrays.asList(100L, 200L),
                 response.getData().get(0).getGoods().stream()
-                        .map(ShoppingCartGoods::getPrice).collect(toList()));
+                        .map(GoodsWithNumber::getPrice).collect(toList()));
         assertEquals(Arrays.asList(200, 300),
                 response.getData().get(0).getGoods().stream()
-                        .map(ShoppingCartGoods::getNumber).collect(toList()));
+                        .map(GoodsWithNumber::getNumber).collect(toList()));
     }
 
     @Test
@@ -69,7 +71,7 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
         assertEquals(Arrays.asList(1L, 2L),
                 response.getData().getGoods().stream().map(Goods::getId).collect(Collectors.toList()));
         assertEquals(Sets.newHashSet(2, 100),
-                response.getData().getGoods().stream().map(ShoppingCartGoods::getNumber).collect(Collectors.toSet()));
+                response.getData().getGoods().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toSet()));
         assertTrue(response.getData().getGoods().stream().allMatch(goods -> goods.getShopId() == 1L));
     }
 

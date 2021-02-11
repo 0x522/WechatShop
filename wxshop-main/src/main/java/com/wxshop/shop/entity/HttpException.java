@@ -23,6 +23,10 @@ public class HttpException extends RuntimeException {
         return new HttpException(message, HttpStatus.BAD_REQUEST.value());
     }
 
+    public static HttpException gone(String message) {
+        return new HttpException(message, HttpStatus.GONE.value());
+    }
+
     public int getStatusCode() {
         return statusCode;
     }
