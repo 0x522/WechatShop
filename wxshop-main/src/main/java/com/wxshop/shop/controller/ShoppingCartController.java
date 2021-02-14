@@ -1,7 +1,6 @@
 package com.wxshop.shop.controller;
 
-import com.wxshop.shop.entity.HttpException;
-import com.wxshop.shop.entity.PageResponse;
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.entity.Response;
 import com.wxshop.shop.entity.ShoppingCartData;
 import com.wxshop.shop.service.ShoppingCartService;
@@ -23,20 +22,12 @@ public class ShoppingCartController {
 
     @PostMapping("/shoppingCart")
     public Response<ShoppingCartData> addToShoppingCart(@RequestBody AddToShoppingCartRequest request) {
-        try {
-            return Response.of(shoppingCartService.addToShoppingCart(request, UserContext.getCurrentUser().getId()));
-        } catch (HttpException e) {
-            return Response.of(e.getMessage(), null);
-        }
+        return Response.of(shoppingCartService.addToShoppingCart(request, UserContext.getCurrentUser().getId()));
     }
 
     @DeleteMapping("/shoppingCart/{goodsId}")
     public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") Long goodsId) {
-        try {
-            return Response.of(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
-        } catch (HttpException e) {
-            return Response.of(e.getMessage(), null);
-        }
+        return Response.of(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
     }
 
     @GetMapping("/shoppingCart")

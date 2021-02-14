@@ -1,4 +1,4 @@
-package com.wxshop.shop.entity;
+package com.wxshop.shop.api.exceptions;
 
 import org.springframework.http.HttpStatus;
 

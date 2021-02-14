@@ -1,7 +1,7 @@
 package com.wxshop.shop.controller;
 
-import com.wxshop.shop.entity.HttpException;
-import com.wxshop.shop.entity.PageResponse;
+
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.entity.Response;
 import com.wxshop.shop.generate.Shop;
 import com.wxshop.shop.service.ShopService;
@@ -36,26 +36,14 @@ public class ShopController {
 
     @PatchMapping("/shop/{id}")
     public Response<Shop> updateShop(@PathVariable("id") Long shopId,
-                                     @RequestBody Shop shop,
-                                     HttpServletResponse response) {
+                                     @RequestBody Shop shop) {
         shop.setId(shopId);
-        try {
-            Shop updatedShop = shopService.updateShop(shop, UserContext.getCurrentUser().getId());
-            return Response.of(updatedShop);
-        } catch (HttpException e) {
-            response.setStatus(e.getStatusCode());
-            return Response.of(e.getMessage(), null);
-        }
+        Shop updatedShop = shopService.updateShop(shop, UserContext.getCurrentUser().getId());
+        return Response.of(updatedShop);
     }
 
     @DeleteMapping("/shop/{id}")
-    public Response<Shop> deleteShop(@PathVariable("id") Long shopId,
-                                     HttpServletResponse response) {
-        try {
-            return Response.of(shopService.deleteShop(shopId, UserContext.getCurrentUser().getId()));
-        } catch (HttpException e) {
-            response.setStatus(e.getStatusCode());
-            return Response.of(e.getMessage(), null);
-        }
+    public Response<Shop> deleteShop(@PathVariable("id") Long shopId) {
+        return Response.of(shopService.deleteShop(shopId, UserContext.getCurrentUser().getId()));
     }
 }

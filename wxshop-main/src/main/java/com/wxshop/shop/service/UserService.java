@@ -2,16 +2,16 @@ package com.wxshop.shop.service;
 
 import com.wxshop.shop.dao.UserDao;
 import com.wxshop.shop.generate.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserDao userDao;
 
-    @Autowired
     public UserService(UserDao userDao) {
         this.userDao = userDao;
     }
@@ -26,11 +26,10 @@ public class UserService {
         } catch (DuplicateKeyException e) {
             return userDao.getUserByTel(tel);
         }
-
-        return user;
+        return new User();
     }
 
-    public User getUserByTel(String tel) {
-        return userDao.getUserByTel(tel);
+    public Optional<User> getUserByTel(String tel) {
+        return Optional.ofNullable(userDao.getUserByTel(tel));
     }
 }

@@ -1,8 +1,8 @@
 package com.wxshop.shop.service;
 
 import com.wxshop.shop.api.DataStatus;
-import com.wxshop.shop.entity.HttpException;
-import com.wxshop.shop.entity.PageResponse;
+import com.wxshop.shop.api.exceptions.HttpException;
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.generate.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

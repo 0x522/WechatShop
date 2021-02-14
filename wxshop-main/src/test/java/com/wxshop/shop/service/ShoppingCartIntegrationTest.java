@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import com.wxshop.shop.WechatShopApplication;
 import com.wxshop.shop.api.DataStatus;
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.controller.ShoppingCartController;
 import com.wxshop.shop.entity.*;
 import com.wxshop.shop.generate.Goods;

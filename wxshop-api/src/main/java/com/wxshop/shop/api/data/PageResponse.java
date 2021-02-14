@@ -1,8 +1,9 @@
-package com.wxshop.shop.entity;
+package com.wxshop.shop.api.data;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class PageResponse<T> {
+public class PageResponse<T> implements Serializable {
     private Integer pageNum;
     private Integer pageSize;
     private Integer totalPage;

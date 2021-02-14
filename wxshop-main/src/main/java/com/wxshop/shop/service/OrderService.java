@@ -3,12 +3,14 @@ package com.wxshop.shop.service;
 import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.api.data.GoodsInfo;
 import com.wxshop.shop.api.data.OrderInfo;
+import com.wxshop.shop.api.data.RpcOrderGoods;
 import com.wxshop.shop.api.generate.Order;
 import com.wxshop.shop.api.rpc.OrderRpcService;
 import com.wxshop.shop.dao.GoodsDeductStockMapper;
 import com.wxshop.shop.entity.GoodsWithNumber;
-import com.wxshop.shop.entity.HttpException;
+import com.wxshop.shop.api.exceptions.HttpException;
 import com.wxshop.shop.entity.OrderResponse;
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.generate.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.Reference;
@@ -44,25 +46,44 @@ public class OrderService {
         this.goodsDeductStockMapper = goodsDeductStockMapper;
     }
 
+    public PageResponse<OrderResponse> getOrder(long userId, Integer pageNum, Integer pageSize, DataStatus status) {
+        PageResponse<RpcOrderGoods> rpcOrderGoods = orderRpcService.getOrder(userId, pageNum, pageSize, status);
+        List<GoodsInfo> goodsInfo = rpcOrderGoods
+                .getData()
+                .stream()
+                .map(RpcOrderGoods::getGoods)
+                .flatMap(List::stream)
+                .collect(toList());
+        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(goodsInfo);
+        List<OrderResponse> orders = rpcOrderGoods
+                .getData()
+                .stream()
+                .map(order -> generateResponse(order.getOrder(), idToGoodsMap, order.getGoods()))
+                .collect(toList());
+        return PageResponse.pagedData(rpcOrderGoods.getPageNum(),
+                rpcOrderGoods.getPageSize(),
+                rpcOrderGoods.getTotalPage(),
+                orders);
+    }
+
     public OrderResponse createOrder(OrderInfo orderInfo, Long userId) {
 
         //获取订单中商品 id->Goods 的映射
-        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(orderInfo);
+        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(orderInfo.getGoods());
 
         //通过Rpc创建订单
         Order createdOrder = createOrderViaRpc(orderInfo, userId, idToGoodsMap);
 
         //返回响应
-        return generateResponse(createdOrder, orderInfo, idToGoodsMap);
+        return generateResponse(createdOrder, idToGoodsMap, orderInfo.getGoods());
     }
 
-    private OrderResponse generateResponse(Order createdOrder, OrderInfo orderInfo, Map<Long, Goods> idToGoodsMap) {
+    private OrderResponse generateResponse(Order createdOrder, Map<Long, Goods> idToGoodsMap, List<GoodsInfo> goodsInfo) {
         OrderResponse response = new OrderResponse(createdOrder);
         Long shopId = new ArrayList<>(idToGoodsMap.values()).get(0).getShopId();
         response.setShop(shopMapper.selectByPrimaryKey(shopId));
         response.setGoods(
-                orderInfo
-                        .getGoods()
+                goodsInfo
                         .stream()
                         .map(goods -> toGoodsWithNumber(goods, idToGoodsMap))
                         .collect(toList())
@@ -70,8 +91,8 @@ public class OrderService {
         return response;
     }
 
-    private Map<Long, Goods> getIdToGoodsMap(OrderInfo orderInfo) {
-        List<Long> goodsId = orderInfo.getGoods()
+    private Map<Long, Goods> getIdToGoodsMap(List<GoodsInfo> goodsInfo) {
+        List<Long> goodsId = goodsInfo
                 .stream()
                 .map(GoodsInfo::getId)
                 .collect(toList());
@@ -119,5 +140,14 @@ public class OrderService {
             result = result + goods.getPrice() * goodsInfo.getNumber();
         }
         return result;
+    }
+
+    public OrderResponse deleteOrder(long orderId, long userId) {
+        RpcOrderGoods rpcOrderGoods = orderRpcService.deleteOrder(orderId, userId);
+
+        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(rpcOrderGoods.getGoods());
+
+        return generateResponse(rpcOrderGoods.getOrder(), idToGoodsMap, rpcOrderGoods.getGoods());
+
     }
 }

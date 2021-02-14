@@ -1,8 +1,8 @@
 package com.wxshop.shop.service;
 
 import com.wxshop.shop.api.DataStatus;
-import com.wxshop.shop.entity.HttpException;
-import com.wxshop.shop.entity.PageResponse;
+import com.wxshop.shop.api.exceptions.HttpException;
+import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.generate.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
