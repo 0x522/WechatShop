@@ -1,7 +1,7 @@
 package com.wxshop.shop.api.data;
 
 
-import com.wxshop.shop.api.generate.Order;
+import com.wxshop.shop.order.generate.Order;
 
 import java.io.Serializable;
 import java.util.List;

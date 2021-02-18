@@ -6,7 +6,7 @@ import com.wxshop.shop.api.data.OrderInfo;
 import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.api.data.RpcOrderGoods;
 import com.wxshop.shop.api.exceptions.HttpException;
-import com.wxshop.shop.api.generate.*;
+import com.wxshop.shop.order.generate.*;
 import com.wxshop.shop.api.rpc.OrderRpcService;
 import com.wxshop.shop.order.mapper.MyOrderMapper;
 import org.apache.dubbo.config.annotation.Service;
@@ -17,18 +17,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
 @Service(version = "${wxshop.orderservice.version}")
 public class RpcOrderServiceImpl implements OrderRpcService {
-    @Autowired
     private OrderMapper orderMapper;
-    @Autowired
-    private MyOrderMapper myOrderMapper;
-    @Autowired
     private OrderGoodsMapper orderGoodsMapper;
+    private MyOrderMapper myOrderMapper;
+
+    @Autowired
+    public RpcOrderServiceImpl(OrderMapper orderMapper, OrderGoodsMapper orderGoodsMapper, MyOrderMapper myOrderMapper) {
+        this.orderMapper = orderMapper;
+        this.orderGoodsMapper = orderGoodsMapper;
+        this.myOrderMapper = myOrderMapper;
+    }
 
     @Override
     public Order createOrder(OrderInfo orderInfo, Order order) {
@@ -53,10 +56,10 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         order.setUpdatedAt(new Date());
         orderMapper.updateByPrimaryKey(order);
 
-        RpcOrderGoods rpcOrderGoods = new RpcOrderGoods();
-        rpcOrderGoods.setGoods(goodsInfo);
-        rpcOrderGoods.setOrder(order);
-        return rpcOrderGoods;
+        RpcOrderGoods result = new RpcOrderGoods();
+        result.setGoods(goodsInfo);
+        result.setOrder(order);
+        return result;
     }
 
 
@@ -83,6 +86,29 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         return PageResponse.pagedData(pageNum, pageSize, totalPage, rpcOrderGoods);
     }
 
+    @Override
+    public RpcOrderGoods getOrderById(long orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            return null;
+        }
+        List<GoodsInfo> goodsInfo = myOrderMapper.getGoodsInfoOfOrder(orderId);
+        RpcOrderGoods result = new RpcOrderGoods();
+        result.setGoods(goodsInfo);
+        result.setOrder(order);
+        return result;
+    }
+
+    @Override
+    public RpcOrderGoods updateOrder(Order order) {
+        orderMapper.updateByPrimaryKey(order);
+        List<GoodsInfo> goodsInfo = myOrderMapper.getGoodsInfoOfOrder(order.getId());
+        RpcOrderGoods result = new RpcOrderGoods();
+        result.setGoods(goodsInfo);
+        result.setOrder(orderMapper.selectByPrimaryKey(order.getId()));
+        return result;
+    }
+
     private RpcOrderGoods toRpcOrderGoods(Order order, Map<Long, List<OrderGoods>> orderIdToGoodsMap) {
         RpcOrderGoods result = new RpcOrderGoods();
         result.setOrder(order);
@@ -104,7 +130,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
     private List<OrderGoods> selectOrderGoodsFromOrders(List<Order> orders) {
         List<Long> orderIds = orders.stream().map(Order::getId).collect(toList());
         OrderGoodsExample selectByOrderIds = new OrderGoodsExample();
-        selectByOrderIds.createCriteria().andGoodsIdIn(orderIds);
+        selectByOrderIds.createCriteria().andOrderIdIn(orderIds);
         return orderGoodsMapper.selectByExample(selectByOrderIds);
     }
 
@@ -113,8 +139,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         pagedOrder.setOffset((pageNum - 1) * pageSize);
         pagedOrder.setLimit(pageSize);
         setStatus(pagedOrder, status).andUserIdEqualTo(userId);
-        List<Order> orders = orderMapper.selectByExample(pagedOrder);
-        return orders;
+        return orderMapper.selectByExample(pagedOrder);
     }
 
     private long calculateCount(DataStatus status) {
@@ -125,7 +150,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
 
     private OrderExample.Criteria setStatus(OrderExample orderExample, DataStatus status) {
         if (status == null) {
-            return orderExample.createCriteria().andStatusEqualTo(DataStatus.DELETED.getName());
+            return orderExample.createCriteria().andStatusNotEqualTo(DataStatus.DELETED.getName());
         } else {
             return orderExample.createCriteria().andStatusEqualTo(status.getName());
         }
@@ -140,8 +165,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         order.setExpressCompany(null);
         order.setCreatedAt(new Date());
         order.setUpdatedAt(new Date());
-        long id = orderMapper.insert(order);
-        order.setId(id);
+        orderMapper.insert(order);
     }
 
     private void verify(BooleanSupplier booleanSupplier, String message) {

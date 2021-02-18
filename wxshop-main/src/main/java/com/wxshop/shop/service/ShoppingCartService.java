@@ -76,7 +76,7 @@ public class ShoppingCartService {
         Map<Long, Goods> idToGoodsMap = goodsService.getIdToGoodsMap(goodsId);
 
         if (idToGoodsMap.values().stream().map(Goods::getShopId).collect(toSet()).size() != 1) {
-            log.error("非法请求:{},{}", goodsId, idToGoodsMap.values());
+            log.debug("非法请求:{},{}", goodsId, idToGoodsMap.values());
             throw HttpException.badRequest("商品ID非法!");
         }
 

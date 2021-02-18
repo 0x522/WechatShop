@@ -11,16 +11,8 @@ public class OrderInfo implements Serializable {
 
     }
 
-    public OrderInfo(long orderId, List<GoodsInfo> goods) {
-        this.orderId = orderId;
-        this.goods = goods;
-    }
-
-    public List<GoodsInfo> getGoods() {
-        return goods;
-    }
-
-    public void setGoods(List<GoodsInfo> goods) {
+    public OrderInfo(long id, List<GoodsInfo> goods) {
+        this.orderId = id;
         this.goods = goods;
     }
 
@@ -30,6 +22,14 @@ public class OrderInfo implements Serializable {
 
     public void setOrderId(long orderId) {
         this.orderId = orderId;
+    }
+
+    public List<GoodsInfo> getGoods() {
+        return goods;
+    }
+
+    public void setGoods(List<GoodsInfo> goods) {
+        this.goods = goods;
     }
 }
 

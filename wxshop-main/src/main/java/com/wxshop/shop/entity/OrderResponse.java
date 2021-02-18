@@ -1,6 +1,6 @@
 package com.wxshop.shop.entity;
 
-import com.wxshop.shop.api.generate.Order;
+import com.wxshop.shop.order.generate.Order;
 import com.wxshop.shop.generate.Shop;
 
 import java.util.List;

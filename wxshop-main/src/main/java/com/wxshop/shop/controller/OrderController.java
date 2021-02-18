@@ -3,6 +3,7 @@ package com.wxshop.shop.controller;
 import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.api.data.OrderInfo;
 import com.wxshop.shop.api.exceptions.HttpException;
+import com.wxshop.shop.order.generate.Order;
 import com.wxshop.shop.entity.OrderResponse;
 import com.wxshop.shop.api.data.PageResponse;
 import com.wxshop.shop.entity.Response;
@@ -42,6 +43,20 @@ public class OrderController {
             throw HttpException.badRequest("非法status:" + status);
         }
         return orderService.getOrder(UserContext.getCurrentUser().getId(), pageNum, pageSize, DataStatus.fromStatus(status));
+    }
 
+    @GetMapping("/order/{id}")
+    public Response<OrderResponse> getOrderById(@PathVariable("id") long orderId) {
+        return Response.of(orderService.getOrderById(UserContext.getCurrentUser().getId(), orderId));
+    }
+
+    @RequestMapping(value = "/order/{id}", method = {RequestMethod.POST, RequestMethod.PATCH})
+    public Response<OrderResponse> updateOrder(@PathVariable("id") Integer id,
+                                               @RequestBody Order order) {
+        if (order.getExpressCompany() != null) {
+            return Response.of(orderService.updateExpressInformation(order, UserContext.getCurrentUser().getId()));
+        } else {
+            return Response.of(orderService.updateOrderStatus(order, UserContext.getCurrentUser().getId()));
+        }
     }
 }

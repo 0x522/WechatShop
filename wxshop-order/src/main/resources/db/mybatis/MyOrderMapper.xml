@@ -5,7 +5,7 @@
         insert into `order`.ORDER_GOODS (GOODS_ID, ORDER_ID,NUMBER)
         values
         <foreach item="item" collection="goods" separator=",">
-            (#{item.id},#{id},#{item.number})
+            (#{item.id},#{orderId},#{item.number})
         </foreach>
     </insert>
     <select id="getGoodsInfoOfOrder" parameterType="long" resultType="GoodsInfo">
@@ -14,4 +14,22 @@
         from `order`.ORDER_GOODS
         where ORDER_ID = #{id}
     </select>
+    <update id="updateById" parameterType="Order">
+        update `order`.ORDER_TABLE
+        set
+        UPDATED_AT =now()
+        <if test="expressCompany != null">
+            ,
+            EXPRESS_COMPANY = #{expressCompany}
+        </if>
+        <if test="expressId != null">
+            ,
+            EXPRESS_ID = #{expressId}
+        </if>
+        <if test="status != null">
+            ,
+            STATUS = #{status}
+        </if>
+        where id = #{id}
+    </update>
 </mapper>

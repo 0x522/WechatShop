@@ -12,4 +12,6 @@ public interface MyOrderMapper {
     void insertOrders(OrderInfo orderInfo);
 
     List<GoodsInfo> getGoodsInfoOfOrder(long orderId);
+
+//    void updateById(Order order);
 }

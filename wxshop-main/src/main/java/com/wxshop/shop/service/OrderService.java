@@ -4,7 +4,7 @@ import com.wxshop.shop.api.DataStatus;
 import com.wxshop.shop.api.data.GoodsInfo;
 import com.wxshop.shop.api.data.OrderInfo;
 import com.wxshop.shop.api.data.RpcOrderGoods;
-import com.wxshop.shop.api.generate.Order;
+import com.wxshop.shop.order.generate.Order;
 import com.wxshop.shop.api.rpc.OrderRpcService;
 import com.wxshop.shop.dao.GoodsDeductStockMapper;
 import com.wxshop.shop.entity.GoodsWithNumber;
@@ -115,7 +115,7 @@ public class OrderService {
     public void deductStock(OrderInfo orderInfo) {
         for (GoodsInfo goodsInfo : orderInfo.getGoods()) {
             if (goodsDeductStockMapper.deductStock(goodsInfo) <= 0) {
-                log.error("扣减库存失败, 商品id: " + goodsInfo.getId() + "，数量：" + goodsInfo.getNumber());
+                log.debug("扣减库存失败, 商品id: " + goodsInfo.getId() + "，数量：" + goodsInfo.getNumber());
                 throw HttpException.gone("扣减库存失败！");
             }
         }
@@ -144,10 +144,52 @@ public class OrderService {
 
     public OrderResponse deleteOrder(long orderId, long userId) {
         RpcOrderGoods rpcOrderGoods = orderRpcService.deleteOrder(orderId, userId);
+        return toOrderResponse(rpcOrderGoods);
+    }
 
+    private OrderResponse toOrderResponse(RpcOrderGoods rpcOrderGoods) {
         Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(rpcOrderGoods.getGoods());
-
         return generateResponse(rpcOrderGoods.getOrder(), idToGoodsMap, rpcOrderGoods.getGoods());
+    }
 
+    public OrderResponse updateExpressInformation(Order order, long userId) {
+        doGetOrderById(userId, order.getId());
+        //防止前端注入有害信息
+        //新建Order对象,只注入有用信息
+        Order copy = new Order();
+        copy.setId(order.getId());
+        copy.setExpressId(order.getExpressId());
+        copy.setExpressCompany(order.getExpressCompany());
+        return toOrderResponse(orderRpcService.updateOrder(copy));
+    }
+
+    public OrderResponse updateOrderStatus(Order order, long userId) {
+        doGetOrderById(userId, order.getId());
+        //防止前端注入有害信息
+        //新建Order对象,只注入有用信息
+        Order copy = new Order();
+        copy.setId(order.getId());
+        copy.setStatus(order.getStatus());
+        return toOrderResponse(orderRpcService.updateOrder(copy));
+    }
+
+    public OrderResponse getOrderById(Long userId, long orderId) {
+        return toOrderResponse(doGetOrderById(userId, orderId));
+    }
+
+    private RpcOrderGoods doGetOrderById(Long userId, long orderId) {
+        RpcOrderGoods orderInDB = orderRpcService.getOrderById(orderId);
+        if (orderInDB == null) {
+            throw HttpException.notFound("订单未找到: " + orderId);
+        }
+        Shop shop = shopMapper.selectByPrimaryKey(orderInDB.getOrder().getShopId());
+        if (shop == null) {
+            throw HttpException.notFound("店铺未找到: " + orderInDB.getOrder().getShopId());
+        }
+
+        if (!shop.getOwnerUserId().equals(userId) && !orderInDB.getOrder().getUserId().equals(userId)) {
+            throw HttpException.forbidden("无权访问！");
+        }
+        return orderInDB;
     }
 }
