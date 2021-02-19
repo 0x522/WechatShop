@@ -8,9 +8,9 @@
   - ZooKeeper: 作为Dubbo的注册中心
   - NGINX: 可选，如果希望实现多实例部署和负载均衡
 ## 部署步骤
-  `docker run -d -v /你自己设置的路径/wxshop-data:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wxshop --name=wxshop-mysql mysql`
-  `docker run -p 6379:6379 -d redis`
-  `docker run -p 2181:2181 -d zookeeper`
+  - `docker run -d -v /你自己设置的路径/wxshop-data:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wxshop --name=wxshop-mysql mysql`
+  - `docker run -p 6379:6379 -d redis`
+  - `docker run -p 2181:2181 -d zookeeper`
   - 等待半分钟，等容器启动完毕
   - 创建order数据库：
     `docker exec -it wxshop-mysql mysql -uroot -proot -e 'create database if not exists `order`'`
