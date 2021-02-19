@@ -177,7 +177,6 @@ public class OrderService {
         copy.setExpressId(order.getExpressId());
         copy.setExpressCompany(order.getExpressCompany());
         copy.setUpdatedAt(new Date());
-        copy.setCreatedAt(new Date());
         return toOrderResponse(orderRpcService.updateOrder(copy));
     }
 
@@ -187,6 +186,7 @@ public class OrderService {
         Order copy = new Order();
         copy.setId(order.getId());
         copy.setStatus(order.getStatus());
+        copy.setUpdatedAt(new Date());
         return toOrderResponse(orderRpcService.updateOrder(copy));
     }
 

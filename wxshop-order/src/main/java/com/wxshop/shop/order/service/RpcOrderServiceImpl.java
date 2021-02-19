@@ -175,7 +175,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         order.setCreatedAt(new Date());
         order.setUpdatedAt(new Date());
 
-        orderMapper.insert(order);
+        orderMapper.insertSelective(order);
     }
 
     private void verify(BooleanSupplier supplier, String message) {
