@@ -13,7 +13,7 @@
   - `docker run -p 2181:2181 -d zookeeper`
   - 等待半分钟，等容器启动完毕
   - 创建order数据库：
-    ```docker exec -it wxshop-mysql mysql -uroot -proot -e 'create database if not exists `order`'
+    - ```docker exec -it wxshop-mysql mysql -uroot -proot -e 'create database if not exists `order`'```
     - `./mvnw install -DskipTests`
     - `./mvnw flyway:migrate -pl wxshop-main`
     - `./mvnw flyway:migrate -pl wxshop-order`
