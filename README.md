@@ -13,10 +13,10 @@
   - `docker run -p 2181:2181 -d zookeeper`
   - 等待半分钟，等容器启动完毕
   - 创建order数据库：
-    `docker exec -it wxshop-mysql mysql -uroot -proot -e 'create database if not exists `order`'`
-    `./mvnw install -DskipTests`
-    `./mvnw flyway:migrate -pl wxshop-main`
-    `./mvnw flyway:migrate -pl wxshop-order`
+    - `docker exec -it wxshop-mysql mysql -uroot -proot -e 'create database if not exists `order`'`
+    - `./mvnw install -DskipTests`
+    - `./mvnw flyway:migrate -pl wxshop-main`
+    - `./mvnw flyway:migrate -pl wxshop-order`
 ## 注意，如果你使用的是Windows，将所有的./mvnw换成./mvnw.cmd
 ## 启动应用本身
 - 在第一个窗口中运行 `java -jar wxshop-order/target/wxshop-order-0.0.1-SNAPSHOT.jar`
