@@ -54,8 +54,8 @@ public class RpcOrderServiceImplTest {
 
         rpcOrderService = new RpcOrderServiceImpl(
                 sqlSession.getMapper(OrderMapper.class),
-                sqlSession.getMapper(OrderGoodsMapper.class),
-                sqlSession.getMapper(MyOrderMapper.class)
+                sqlSession.getMapper(MyOrderMapper.class),
+                sqlSession.getMapper(OrderGoodsMapper.class)
         );
     }
 
