@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
@@ -87,6 +84,7 @@ public class OrderService {
         order.setUserId(userId);
         order.setShopId(new ArrayList<>(idToGoodsMap.values()).get(0).getShopId());
         order.setStatus(DataStatus.PENDING.getName());
+        order.setCreatedAt(new Date());
 
         String address = orderInfo.getAddress() == null ?
                 userMapper.selectByPrimaryKey(userId).getAddress() :
@@ -178,6 +176,7 @@ public class OrderService {
         copy.setId(order.getId());
         copy.setExpressId(order.getExpressId());
         copy.setExpressCompany(order.getExpressCompany());
+        copy.setUpdatedAt(new Date());
         return toOrderResponse(orderRpcService.updateOrder(copy));
     }
 
