@@ -51,8 +51,9 @@ public class OrderController {
     }
 
     @RequestMapping(value = "/order/{id}", method = {RequestMethod.POST, RequestMethod.PATCH})
-    public Response<OrderResponse> updateOrder(@PathVariable("id") Integer id,
+    public Response<OrderResponse> updateOrder(@PathVariable("id") long id,
                                                @RequestBody Order order) {
+        order.setId(id);
         if (order.getExpressCompany() != null) {
             return Response.of(orderService.updateExpressInformation(order, UserContext.getCurrentUser().getId()));
         } else {

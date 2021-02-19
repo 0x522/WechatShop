@@ -6,6 +6,7 @@ import java.util.List;
 public class OrderInfo implements Serializable {
     private long orderId;
     private List<GoodsInfo> goods;
+    String address;
 
     public OrderInfo() {
 
@@ -30,6 +31,14 @@ public class OrderInfo implements Serializable {
 
     public void setGoods(List<GoodsInfo> goods) {
         this.goods = goods;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 
